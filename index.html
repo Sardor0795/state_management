@@ -1,0 +1,876 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Complete State Management Course</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;700&family=Sora:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0d0b16; --panel: #181426; --panel2: #201a33; --panel3: #2e2547;
+  --acc: #a78bfa; --acc2: #f472b6; --acc3: #60a5fa; --acc4: #fbbf24; --acc5: #f87171; --acc6: #34d399;
+  --txt: #ece9f5; --txt2: #9a92b5; --txt3: #cfc9e0; --border: #2a2440;
+  --code: #08060f;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Sora', sans-serif; background: var(--bg); color: var(--txt); line-height: 1.7; }
+#shell { display: flex; min-height: 100vh; }
+#sidebar { width: 286px; flex-shrink: 0; background: var(--panel); border-right: 1px solid var(--border); position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 24px 0; }
+.brand { padding: 0 22px 18px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+.brand .kicker { font-size: 11px; letter-spacing: 3px; color: var(--acc); text-transform: uppercase; font-weight: 700; }
+.brand h1 { font-size: 18px; font-weight: 800; margin-top: 4px; line-height: 1.3; }
+.brand .sub { font-size: 12px; color: var(--txt2); margin-top: 6px; }
+.nav-group { padding: 8px 0; }
+.nav-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; color: var(--txt2); padding: 6px 22px; }
+.nav-link { display: block; padding: 8px 22px; color: var(--txt2); text-decoration: none; font-size: 13px; border-left: 3px solid transparent; transition: all .15s; }
+.nav-link:hover { background: rgba(167,139,250,.06); color: var(--txt3); }
+.nav-link.active { background: rgba(167,139,250,.1); color: var(--acc); border-left-color: var(--acc); font-weight: 600; }
+.nav-link .n { display: inline-block; width: 26px; color: var(--acc2); font-family: 'Fira Code', monospace; font-size: 12px; }
+#main { flex: 1; max-width: 900px; margin: 0 auto; padding: 0 0 120px; }
+.topbar { position: sticky; top: 0; background: rgba(13,11,22,.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); padding: 14px 40px; z-index: 50; display: flex; align-items: center; gap: 16px; }
+.topbar .prog-wrap { flex: 1; height: 6px; background: var(--panel2); border-radius: 3px; overflow: hidden; }
+.topbar .prog-bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--acc), var(--acc2)); transition: width .3s; }
+.topbar .prog-txt { font-size: 12px; color: var(--txt2); font-family: 'Fira Code', monospace; white-space: nowrap; }
+section { padding: 48px 40px 0; scroll-margin-top: 70px; }
+.tag { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--acc); font-weight: 700; }
+section h2 { font-size: 30px; font-weight: 800; margin: 8px 0 6px; line-height: 1.2; }
+section h2 .emoji { margin-right: 8px; }
+.intro { font-size: 16px; color: var(--txt2); border-left: 3px solid var(--acc); padding-left: 16px; margin: 18px 0 28px; }
+h3 { font-size: 21px; font-weight: 700; margin: 38px 0 12px; color: #fff; }
+h3::before { content: "\203A  "; color: var(--acc2); }
+h4 { font-size: 16px; font-weight: 600; margin: 24px 0 8px; color: var(--acc); }
+p { color: var(--txt3); margin-bottom: 14px; font-size: 15px; }
+p strong, li strong { color: #fff; font-weight: 600; }
+ul, ol { margin: 0 0 16px 22px; }
+li { color: var(--txt3); margin-bottom: 7px; font-size: 15px; }
+code { font-family: 'Fira Code', monospace; background: var(--panel3); color: var(--acc); padding: 2px 7px; border-radius: 5px; font-size: 13px; }
+.analogy { background: linear-gradient(135deg, rgba(244,114,182,.07), rgba(167,139,250,.05)); border: 1px solid rgba(244,114,182,.22); border-radius: 12px; padding: 18px 22px; margin: 18px 0; }
+.analogy .label { font-size: 12px; font-weight: 700; color: var(--acc2); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.analogy p { margin-bottom: 0; }
+.code { background: var(--code); border: 1px solid var(--border); border-radius: 12px; margin: 16px 0 24px; overflow: hidden; }
+.code .head { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; background: var(--panel2); border-bottom: 1px solid var(--border); }
+.code .lang { font-size: 11px; letter-spacing: 1px; color: var(--acc); font-family: 'Fira Code', monospace; }
+.code .copy { font-size: 11px; color: var(--txt2); background: none; border: 1px solid var(--border); border-radius: 5px; padding: 3px 10px; cursor: pointer; font-family: 'Fira Code', monospace; transition: all .15s; }
+.code .copy:hover { background: var(--panel3); color: var(--txt); }
+.code pre { padding: 18px 20px; overflow-x: auto; margin: 0; }
+.code code { background: none; color: var(--txt); padding: 0; font-size: 13px; line-height: 1.75; display: block; }
+.cmt { color: #5a5478; font-style: italic; }
+.kw{color:#c792ea}.fn{color:#82aaff}.str{color:#c3e88d}.num{color:#f78c6c}.op{color:#89ddff}.pr{color:#80cbc4}.tg{color:#f07178}.var{color:#ece9f5}.obj{color:#ffcb6b}
+.hl { color: var(--acc); font-weight: 600; }
+.note { border-radius: 12px; padding: 14px 18px; margin: 16px 0; border-left: 4px solid; display: flex; gap: 12px; align-items: flex-start; }
+.note .ico { font-size: 18px; flex-shrink: 0; }
+.note .body { font-size: 14px; }
+.note.info { background: rgba(96,165,250,.07); border-color: var(--acc3); }
+.note.warn { background: rgba(251,191,36,.08); border-color: var(--acc4); }
+.note.ok { background: rgba(52,211,153,.08); border-color: var(--acc6); }
+.note.pro { background: rgba(167,139,250,.08); border-color: var(--acc); }
+.note.bad { background: rgba(248,113,113,.08); border-color: var(--acc5); }
+table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; font-size: 14px; }
+th { text-align: left; padding: 10px 14px; background: var(--panel2); border: 1px solid var(--border); color: var(--acc); font-weight: 600; }
+td { padding: 9px 14px; border: 1px solid var(--border); color: var(--txt3); vertical-align: top; }
+tr:hover td { background: rgba(255,255,255,.02); }
+.y { color: var(--acc6); font-weight: 600; } .nn { color: var(--acc5); } .mid { color: var(--acc4); }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px,1fr)); gap: 14px; margin: 16px 0 24px; }
+.card { background: var(--panel); border: 1px solid var(--border); border-radius: 12px; padding: 18px; }
+.card h5 { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.card ul { margin: 0 0 0 18px; } .card li { font-size: 13px; margin-bottom: 5px; }
+.ex { background: var(--panel); border: 1px solid var(--acc); border-radius: 14px; padding: 22px; margin: 28px 0; }
+.ex .eh { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.ex .enum { background: var(--acc); color: #0d0b16; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 6px; font-family: 'Fira Code', monospace; }
+.ex .etitle { font-size: 17px; font-weight: 700; color: #fff; }
+.ex .edesc { font-size: 14px; color: var(--txt2); margin-bottom: 14px; }
+.ex ul { list-style: none; margin: 0; padding: 0; }
+.ex li { display: flex; gap: 10px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.ex li:last-child { border-bottom: none; }
+.chk { width: 20px; height: 20px; border-radius: 5px; border: 1.5px solid var(--border); cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; transition: all .15s; margin-top: 1px; }
+.chk.done { background: var(--acc); border-color: var(--acc); color: #0d0b16; }
+.ex li.done span:last-child { text-decoration: line-through; color: var(--txt2); }
+.divider { height: 1px; background: var(--border); margin: 40px 0; }
+.up { display: inline-block; margin-top: 8px; font-size: 13px; color: var(--acc); text-decoration: none; }
+@media (max-width: 860px) { #sidebar { display: none; } section { padding: 32px 18px 0; } .topbar { padding: 12px 18px; } section h2 { font-size: 24px; } }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--panel3); border-radius: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+</style>
+</head>
+<body>
+<div id="shell">
+<aside id="sidebar">
+<div class="brand">
+<div class="kicker">React &middot; STATE</div>
+<h1>The Complete State Management Course</h1>
+<div class="sub">Context, Redux, Redux Toolkit, Saga, Zustand, Jotai &mdash; every tool, fully explained.</div>
+</div>
+<nav>
+<div class="nav-group"><div class="nav-label">Foundations</div>
+<a class="nav-link" href="#s0"><span class="n">00</span>What state management is</a>
+<a class="nav-link" href="#s1"><span class="n">01</span>useState &amp; useReducer</a>
+<a class="nav-link" href="#s2"><span class="n">02</span>The prop-drilling problem</a></div>
+<div class="nav-group"><div class="nav-label">Context</div>
+<a class="nav-link" href="#s3"><span class="n">03</span>Context API</a></div>
+<div class="nav-group"><div class="nav-label">Redux family</div>
+<a class="nav-link" href="#s4"><span class="n">04</span>Redux core concepts</a>
+<a class="nav-link" href="#s5"><span class="n">05</span>Redux Toolkit (RTK)</a>
+<a class="nav-link" href="#s6"><span class="n">06</span>Async: Thunks</a>
+<a class="nav-link" href="#s7"><span class="n">07</span>Redux-Saga</a>
+<a class="nav-link" href="#s8"><span class="n">08</span>RTK Query</a></div>
+<div class="nav-group"><div class="nav-label">Modern minimalist</div>
+<a class="nav-link" href="#s9"><span class="n">09</span>Zustand</a>
+<a class="nav-link" href="#s10"><span class="n">10</span>Jotai &amp; atoms</a>
+<a class="nav-link" href="#s11"><span class="n">11</span>Others (Recoil, MobX, Valtio)</a></div>
+<div class="nav-group"><div class="nav-label">Wrap-up</div>
+<a class="nav-link" href="#s12"><span class="n">12</span>Compare &amp; choose</a>
+<a class="nav-link" href="#s13"><span class="n">13</span>Master checklist</a></div>
+</nav>
+</aside>
+<main id="main">
+<div class="topbar">
+<span class="prog-txt" id="ptxt">Section 1 / 14</span>
+<div class="prog-wrap"><div class="prog-bar" id="pbar"></div></div>
+<span class="prog-txt" id="ptasks">0 tasks</span>
+</div>
+<section id="s0">
+<div class="tag">Foundations &middot; 00</div>
+<h2><span class="emoji">&#129518;</span>What state management is</h2>
+<p class="intro">"State" is just <strong>data that changes over time and affects what the user sees</strong>. State management is the discipline of deciding where that data lives, who can change it, and how components stay in sync when it changes.</p>
+<h3>What counts as state?</h3>
+<p>Anything your UI remembers: the value typed in an input, whether a modal is open, the logged-in user, the items in a cart, the list of products from an API, the current theme. When state changes, React re-renders the components that depend on it &mdash; that's the entire engine behind a dynamic UI.</p>
+<h3>The four kinds of state (the most important mental model)</h3>
+<p>Picking the right tool starts with knowing <em>what kind</em> of state you have. This single distinction prevents most state-management mistakes:</p>
+<table>
+<tr><th>Kind</th><th>Examples</th><th>Where it usually belongs</th></tr>
+<tr><td><strong>Local UI state</strong></td><td>input text, modal open, toggle, hover</td><td><code>useState</code> in the component</td></tr>
+<tr><td><strong>Shared/global client state</strong></td><td>theme, auth user, language, sidebar</td><td>Context / Zustand / Redux</td></tr>
+<tr><td><strong>Server state</strong></td><td>products, posts, anything from an API</td><td class="y">TanStack Query / RTK Query</td></tr>
+<tr><td><strong>URL state</strong></td><td>filters, page number, search term</td><td>The router / query params</td></tr>
+</table>
+<div class="note pro"><span class="ico">&#129504;</span><div class="body"><strong>The biggest insight in modern state management:</strong> server data is NOT the same as client state. It's a cached copy of remote data with its own concerns (loading, staleness, refetching). When you move server data out of a global store into a dedicated tool (TanStack/RTK Query), your "global state" often shrinks to almost nothing &mdash; sometimes you don't need Redux at all. We'll come back to this repeatedly.</div></div>
+<h3>The problem all these libraries solve</h3>
+<p>React passes data <em>down</em> through props. That's fine until two distant components need the same data &mdash; say a header showing the cart count and a cart page. You'd have to thread that data through every component in between (prop drilling, Section 02). State management libraries give you a <strong>shared place</strong> any component can read from and write to directly, skipping the threading.</p>
+<div class="analogy"><div class="label">The shared whiteboard</div><p>Props are like passing a note hand-to-hand down a row of people &mdash; tedious and everyone in between has to handle it. A global store is a whiteboard on the wall: anyone who needs the info just looks at it, and when someone updates it, everyone watching sees the change instantly. State libraries are different designs of that whiteboard.</p></div>
+<h3>What we'll cover</h3>
+<p>This course walks from the built-in tools (useState, useReducer, Context) up through the Redux family (Redux, Redux Toolkit, Saga, RTK Query) and the modern minimalist libraries (Zustand, Jotai, and others) &mdash; ending with how to choose. Every tool answers the same question differently: <em>where does shared state live and how do components subscribe to it?</em></p>
+<div class="ex"><div class="eh"><span class="enum">EX 00</span><span class="etitle">Classify your state</span></div><ul>
+<li><span class="chk"></span><span>In any app you know, list 2 pieces each of local, global, server, and URL state.</span></li>
+<li><span class="chk"></span><span>Find one piece of server data that might be wrongly stored as "global state".</span></li>
+<li><span class="chk"></span><span>Explain why a cart count in the header is "shared" state.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s1">
+<div class="tag">Foundations &middot; 01</div>
+<h2><span class="emoji">&#9881;&#65039;</span>useState &amp; useReducer</h2>
+<p class="intro">Before any library, React has two built-in hooks for state. Master these first &mdash; most libraries are just these ideas scaled up, and a huge amount of state never needs anything more.</p>
+<h3>useState - the workhorse</h3>
+<p><code>useState</code> stores a single piece of local state and gives you a setter to change it. Calling the setter re-renders the component with the new value.</p>
+<div class="code"><div class="head"><span class="lang">React</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="cmt">// [current value, function to update it]</span>
+  <span class="kw">const</span> [<span class="var">count</span>, <span class="var">setCount</span>] <span class="op">=</span> <span class="fn">useState</span>(<span class="num">0</span>)   <span class="cmt">// 0 = initial value</span>
+
+  <span class="kw">return</span> (
+    &lt;<span class="tg">button</span> onClick={() <span class="op">=&gt;</span> <span class="fn">setCount</span>(count <span class="op">+</span> <span class="num">1</span>)}&gt;
+      Count: {count}
+    &lt;/<span class="tg">button</span>&gt;
+  )
+}</code></pre></div>
+<div class="note warn"><span class="ico">&#9888;&#65039;</span><div class="body"><strong>Update with a function when the new value depends on the old one:</strong> <code>setCount(c =&gt; c + 1)</code> instead of <code>setCount(count + 1)</code>. State updates are batched and asynchronous, so reading <code>count</code> directly can be stale. The function form always gets the latest value.</div></div>
+<h3>useReducer - for complex state logic</h3>
+<p>When state has multiple sub-values that change together, or the update logic gets complicated, <code>useReducer</code> centralizes it. You dispatch <em>actions</em> (objects describing what happened), and a <em>reducer</em> function decides the next state. <strong>This is the exact mental model Redux is built on</strong> &mdash; learn it here and Redux is half-learned.</p>
+<div class="code"><div class="head"><span class="lang">React</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { useReducer } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// reducer: (currentState, action) =&gt; newState. A PURE function.</span>
+<span class="kw">function</span> <span class="fn">reducer</span>(state, action) {
+  <span class="kw">switch</span> (action.<span class="pr">type</span>) {
+    <span class="kw">case</span> <span class="str">'increment'</span>: <span class="kw">return</span> { count: state.count <span class="op">+</span> <span class="num">1</span> }
+    <span class="kw">case</span> <span class="str">'decrement'</span>: <span class="kw">return</span> { count: state.count <span class="op">-</span> <span class="num">1</span> }
+    <span class="kw">case</span> <span class="str">'reset'</span>:     <span class="kw">return</span> { count: <span class="num">0</span> }
+    <span class="kw">default</span>:          <span class="kw">return</span> state
+  }
+}
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="kw">const</span> [<span class="var">state</span>, <span class="var">dispatch</span>] <span class="op">=</span> <span class="fn">useReducer</span>(reducer, { count: <span class="num">0</span> })
+
+  <span class="kw">return</span> (
+    &lt;<span class="tg">div</span>&gt;
+      Count: {state.count}
+      &lt;<span class="tg">button</span> onClick={() <span class="op">=&gt;</span> <span class="fn">dispatch</span>({ type: <span class="str">'increment'</span> })}&gt;+&lt;/<span class="tg">button</span>&gt;
+      &lt;<span class="tg">button</span> onClick={() <span class="op">=&gt;</span> <span class="fn">dispatch</span>({ type: <span class="str">'reset'</span> })}&gt;reset&lt;/<span class="tg">button</span>&gt;
+    &lt;/<span class="tg">div</span>&gt;
+  )
+}</code></pre></div>
+<h3>Three concepts to remember (they reappear everywhere)</h3>
+<ul>
+<li><strong>Action</strong> &mdash; a plain object describing what happened: <code>{ type: 'increment' }</code>. Sometimes carries data in a <code>payload</code>.</li>
+<li><strong>Dispatch</strong> &mdash; the function you call to send an action.</li>
+<li><strong>Reducer</strong> &mdash; a pure function <code>(state, action) =&gt; newState</code>. Given the same inputs it always returns the same output, and it never mutates the old state &mdash; it returns a new one.</li>
+</ul>
+<div class="note ok"><span class="ico">&#9989;</span><div class="body"><strong>useState vs useReducer:</strong> use <code>useState</code> for simple, independent values. Reach for <code>useReducer</code> when several values change together, when the next state depends on complex rules, or when you want all update logic in one testable place. Both are <em>local</em> &mdash; they don't share across distant components, which is what the rest of this course solves.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 01</span><span class="etitle">Master the built-ins</span></div><ul>
+<li><span class="chk"></span><span>Build a counter with useState using the functional updater form.</span></li>
+<li><span class="chk"></span><span>Rewrite it with useReducer (increment/decrement/reset actions).</span></li>
+<li><span class="chk"></span><span>Build a useReducer that manages a form with several fields.</span></li>
+<li><span class="chk"></span><span>Explain why a reducer must be pure and never mutate state.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s2">
+<div class="tag">Foundations &middot; 02</div>
+<h2><span class="emoji">&#129683;</span>The prop-drilling problem</h2>
+<p class="intro">To understand <em>why</em> every state library exists, you need to feel the pain they remove. That pain is prop drilling.</p>
+<h3>What prop drilling is</h3>
+<p>When a deeply nested component needs data that lives high up, you must pass it through <strong>every</strong> component in between &mdash; even ones that don't use it, just to forward it along. Those middle components become cluttered "mail carriers" for data they don't care about.</p>
+<div class="code"><div class="head"><span class="lang">React - the user prop drilled 3 levels deep</span></div><pre><code><span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">const</span> [<span class="var">user</span>] <span class="op">=</span> <span class="fn">useState</span>({ name: <span class="str">'Alice'</span> })
+  <span class="kw">return</span> &lt;<span class="tg">Layout</span> user={user} /&gt;          <span class="cmt">// Layout doesn't use user...</span>
+}
+<span class="kw">function</span> <span class="fn">Layout</span>({ user }) {
+  <span class="kw">return</span> &lt;<span class="tg">Header</span> user={user} /&gt;          <span class="cmt">// ...just forwards it...</span>
+}
+<span class="kw">function</span> <span class="fn">Header</span>({ user }) {
+  <span class="kw">return</span> &lt;<span class="tg">Avatar</span> user={user} /&gt;          <span class="cmt">// ...still forwarding...</span>
+}
+<span class="kw">function</span> <span class="fn">Avatar</span>({ user }) {
+  <span class="kw">return</span> &lt;<span class="tg">span</span>&gt;{user.name}&lt;/<span class="tg">span</span>&gt;          <span class="cmt">// finally used here!</span>
+}</code></pre></div>
+<div class="note bad"><span class="ico">&#128680;</span><div class="body"><strong>Why it hurts at scale:</strong> add a field and you edit every layer. Rename a prop and you touch them all. Middle components can't be reused elsewhere because they demand props they don't need. Multiply across dozens of shared values and the app becomes rigid and noisy. This is the exact problem Context and every store library solve.</div></div>
+<h3>The two families of solutions</h3>
+<ul>
+<li><strong>Context API</strong> (built into React) &mdash; create a shared "channel" any descendant can read from, no threading. Great for low-frequency global values. (Section 03.)</li>
+<li><strong>Store libraries</strong> (Redux, Zustand, Jotai&hellip;) &mdash; an external store any component subscribes to, with extra powers: fine-grained updates, devtools, middleware, async handling. (The rest of the course.)</li>
+</ul>
+<div class="note info"><span class="ico">&#128161;</span><div class="body"><strong>Don't over-correct.</strong> Prop drilling 1&ndash;2 levels is completely fine &mdash; reaching for a global store to avoid passing one prop one level is over-engineering. The problem is <em>deep</em> drilling of <em>widely-shared</em> data. Also, <strong>component composition</strong> (passing JSX as <code>children</code>) can eliminate a lot of drilling without any library at all.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 02</span><span class="etitle">Feel the pain</span></div><ul>
+<li><span class="chk"></span><span>Build a 3-level component tree that drills one prop, then note the friction of adding a second.</span></li>
+<li><span class="chk"></span><span>Identify a case where 1-level drilling is fine and a store would be overkill.</span></li>
+<li><span class="chk"></span><span>Sketch how component composition (children) could avoid some drilling.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+<section id="s3">
+<div class="tag">Context &middot; 03</div>
+<h2><span class="emoji">&#128225;</span>Context API</h2>
+<p class="intro">Context is React's <strong>built-in</strong> answer to prop drilling. It lets you create a shared value that any descendant component can read directly, without passing props through every level. No library to install.</p>
+<h3>The three pieces</h3>
+<ul>
+<li><strong>createContext</strong> &mdash; creates the context object (the "channel").</li>
+<li><strong>Provider</strong> &mdash; wraps part of your tree and supplies the value to everything inside.</li>
+<li><strong>useContext</strong> &mdash; the hook a component calls to read the value.</li>
+</ul>
+<div class="code"><div class="head"><span class="lang">React - a theme context</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { createContext, useContext, useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="cmt">// 1. create the context</span>
+<span class="kw">const</span> <span class="var">ThemeContext</span> <span class="op">=</span> <span class="fn">createContext</span>()
+
+<span class="cmt">// 2. a provider component that holds the state &amp; supplies it</span>
+<span class="kw">export function</span> <span class="fn">ThemeProvider</span>({ children }) {
+  <span class="kw">const</span> [<span class="var">theme</span>, <span class="var">setTheme</span>] <span class="op">=</span> <span class="fn">useState</span>(<span class="str">'light'</span>)
+  <span class="kw">const</span> <span class="var">toggle</span> <span class="op">=</span> () <span class="op">=&gt;</span> <span class="fn">setTheme</span>(t <span class="op">=&gt;</span> t <span class="op">===</span> <span class="str">'light'</span> ? <span class="str">'dark'</span> : <span class="str">'light'</span>)
+
+  <span class="kw">return</span> (
+    &lt;<span class="tg">ThemeContext.Provider</span> value={{ theme, toggle }}&gt;
+      {children}
+    &lt;/<span class="tg">ThemeContext.Provider</span>&gt;
+  )
+}
+
+<span class="cmt">// 3. a tiny custom hook so components consume it cleanly</span>
+<span class="kw">export const</span> <span class="fn">useTheme</span> <span class="op">=</span> () <span class="op">=&gt;</span> <span class="fn">useContext</span>(ThemeContext)</code></pre></div>
+<div class="code"><div class="head"><span class="lang">React - using it</span><button class="copy">copy</button></div><pre><code><span class="cmt">// wrap the app once (usually near the root)</span>
+&lt;<span class="tg">ThemeProvider</span>&gt;
+  &lt;<span class="tg">App</span> /&gt;
+&lt;/<span class="tg">ThemeProvider</span>&gt;
+
+<span class="cmt">// ANY component inside can now read it - no props threaded</span>
+<span class="kw">function</span> <span class="fn">Header</span>() {
+  <span class="kw">const</span> { <span class="var">theme</span>, <span class="var">toggle</span> } <span class="op">=</span> <span class="fn">useTheme</span>()
+  <span class="kw">return</span> &lt;<span class="tg">button</span> onClick={toggle}&gt;Theme: {theme}&lt;/<span class="tg">button</span>&gt;
+}</code></pre></div>
+<div class="note ok"><span class="ico">&#9989;</span><div class="body"><strong>The custom-hook wrapper</strong> (<code>useTheme</code>) is a best practice: components import one clean hook instead of both <code>useContext</code> and the context object, and you can add an error if it's used outside the provider.</div></div>
+<h3>The critical limitation: re-renders</h3>
+<div class="note bad"><span class="ico">&#128680;</span><div class="body"><strong>Context's big gotcha:</strong> when the provider's value changes, <em>every</em> component that consumes that context re-renders &mdash; even if it only uses a part that didn't change. There's no built-in way to subscribe to just a slice. For values that change <em>often</em> and are consumed <em>widely</em>, this causes performance problems. This single limitation is the main reason dedicated store libraries (Zustand, Redux) exist.</div></div>
+<h3>What Context is and isn't for</h3>
+<table>
+<tr><th>Great for Context</th><th>Reach for a store instead</th></tr>
+<tr><td class="y">Theme (light/dark)</td><td class="nn">Fast-changing state read everywhere</td></tr>
+<tr><td class="y">Current user / auth</td><td class="nn">Large, complex global state</td></tr>
+<tr><td class="y">Language / locale</td><td class="nn">Need devtools / time-travel</td></tr>
+<tr><td class="y">Anything that rarely changes</td><td class="nn">Need fine-grained subscriptions</td></tr>
+</table>
+<div class="note info"><span class="ico">&#128161;</span><div class="body"><strong>Common misconception:</strong> "Context is a state manager." Not quite &mdash; Context is a <em>delivery mechanism</em> (it passes a value down without props). The actual state still lives in a <code>useState</code>/<code>useReducer</code> somewhere. Zustand/Redux are true state managers <em>and</em> handle delivery efficiently. You can mitigate Context re-renders by splitting into multiple small contexts (e.g. separate ThemeContext and AuthContext), so a change in one doesn't re-render consumers of the other.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 03</span><span class="etitle">Build with Context</span></div><ul>
+<li><span class="chk"></span><span>Create a ThemeProvider + useTheme and toggle theme from a deep component.</span></li>
+<li><span class="chk"></span><span>Create an AuthContext holding a user + login/logout.</span></li>
+<li><span class="chk"></span><span>Demonstrate the re-render issue: log renders when an unrelated value changes.</span></li>
+<li><span class="chk"></span><span>Split one big context into two small ones and observe fewer re-renders.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s4">
+<div class="tag">Redux family &middot; 04</div>
+<h2><span class="emoji">&#127978;</span>Redux core concepts</h2>
+<p class="intro">Redux is the most famous state library. It puts <em>all</em> your global state in one central <strong>store</strong>, changed only through a strict, predictable flow. We'll learn classic Redux first to understand the model &mdash; then Section 05 shows the modern way (Redux Toolkit) you'll actually write.</p>
+<h3>The one-way data flow</h3>
+<div class="code"><div class="head"><span class="lang">The Redux loop</span></div><pre><code>  Component dispatches an ACTION
+        |  { type: 'cart/itemAdded', payload: item }
+        v
+  REDUCER receives (state, action) -&gt; returns NEW state
+        |
+        v
+  STORE holds the single source of truth
+        |
+        v
+  Components SUBSCRIBED to that state re-render
+        |
+        +-----------&lt; user interacts again &lt;-----------+
+
+  Data flows ONE direction. Every change is traceable.</code></pre></div>
+<h3>The vocabulary</h3>
+<table>
+<tr><th>Term</th><th>What it is</th></tr>
+<tr><td><strong>Store</strong></td><td>The single object holding all global state</td></tr>
+<tr><td><strong>Action</strong></td><td>A plain object describing what happened: <code>{ type, payload }</code></td></tr>
+<tr><td><strong>Reducer</strong></td><td>Pure fn <code>(state, action) =&gt; newState</code> &mdash; same as useReducer</td></tr>
+<tr><td><strong>Dispatch</strong></td><td>The function to send an action to the store</td></tr>
+<tr><td><strong>Selector</strong></td><td>A function that reads a slice of state: <code>s =&gt; s.cart.total</code></td></tr>
+</table>
+<div class="analogy"><div class="label">A bank</div><p>You can't reach into the vault and grab cash (no direct state mutation). You fill out a <strong>slip</strong> (an action: "withdraw $50"), hand it to the teller (<strong>dispatch</strong>), who follows strict rules (the <strong>reducer</strong>) to update the ledger (the <strong>store</strong>). Every transaction is recorded and auditable &mdash; that's Redux's predictability and its famous time-travel debugging.</p></div>
+<h3>The three principles</h3>
+<ul>
+<li><strong>Single source of truth</strong> &mdash; all state in one store, so there's one place to look.</li>
+<li><strong>State is read-only</strong> &mdash; you never mutate it directly; you dispatch an action.</li>
+<li><strong>Changes via pure reducers</strong> &mdash; predictable, testable, no surprises.</li>
+</ul>
+<div class="note warn"><span class="ico">&#9888;&#65039;</span><div class="body"><strong>Classic Redux's reputation for boilerplate is real and deserved.</strong> Plain Redux makes you write action type constants, action creator functions, immutable update logic by hand, and lots of wiring &mdash; a simple counter could span several files. This pain is exactly why <strong>Redux Toolkit</strong> (next section) was created and is now the <em>official, recommended</em> way to use Redux. You should essentially never write classic Redux by hand today &mdash; but understanding this flow makes Toolkit obvious.</div></div>
+<div class="note pro"><span class="ico">&#129504;</span><div class="body"><strong>What Redux is genuinely great at:</strong> large apps with complex, interconnected global state; powerful DevTools (inspect every action, time-travel through state changes); a huge ecosystem; and predictability that scales to big teams. What it's overkill for: small apps, or state that's mostly server data (use a query library) or mostly local (use useState).</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 04</span><span class="etitle">Understand the flow</span></div><ul>
+<li><span class="chk"></span><span>Draw the Redux loop for a "add to cart" action.</span></li>
+<li><span class="chk"></span><span>Write out an action object for "remove item id 5".</span></li>
+<li><span class="chk"></span><span>Explain why reducers must be pure (no API calls, no mutation).</span></li>
+<li><span class="chk"></span><span>List 2 things Redux is great for and 2 things it's overkill for.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+<section id="s5">
+<div class="tag">Redux family &middot; 05</div>
+<h2><span class="emoji">&#128736;&#65039;</span>Redux Toolkit (RTK)</h2>
+<p class="intro">Redux Toolkit is the <strong>official, modern way to write Redux</strong>. It keeps the exact same concepts from Section 04 but removes nearly all the boilerplate. If you use Redux today, you use RTK &mdash; full stop.</p>
+<h3>What RTK fixes</h3>
+<table>
+<tr><th>Classic Redux pain</th><th>RTK solution</th></tr>
+<tr><td>Action type constants by hand</td><td class="y">Auto-generated from your reducers</td></tr>
+<tr><td>Action creator functions by hand</td><td class="y">Auto-generated</td></tr>
+<tr><td>Manual immutable updates (spread everywhere)</td><td class="y">Write "mutating" code; Immer makes it immutable</td></tr>
+<tr><td>Store setup wiring</td><td class="y">One <code>configureStore</code> call (DevTools included)</td></tr>
+<tr><td>Many files per feature</td><td class="y">One "slice" file</td></tr>
+</table>
+<h3>The heart of RTK: createSlice</h3>
+<p>A <strong>slice</strong> bundles a piece of state with its reducers and auto-generates the actions. One file replaces what used to be several.</p>
+<div class="code"><div class="head"><span class="lang">features/cart/cartSlice.js</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { createSlice } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>
+
+<span class="kw">const</span> <span class="var">cartSlice</span> <span class="op">=</span> <span class="fn">createSlice</span>({
+  <span class="pr">name</span>: <span class="str">'cart'</span>,
+  <span class="pr">initialState</span>: { items: [], total: <span class="num">0</span> },
+  <span class="pr">reducers</span>: {
+    <span class="cmt">// looks like mutation, but Immer makes it safely immutable!</span>
+    <span class="fn">itemAdded</span>(state, action) {
+      state.items.<span class="fn">push</span>(action.payload)
+      state.total <span class="op">+=</span> action.payload.price
+    },
+    <span class="fn">itemRemoved</span>(state, action) {
+      state.items <span class="op">=</span> state.items.<span class="fn">filter</span>(i <span class="op">=&gt;</span> i.id <span class="op">!==</span> action.payload)
+    },
+    <span class="fn">cartCleared</span>(state) {
+      state.items <span class="op">=</span> []; state.total <span class="op">=</span> <span class="num">0</span>
+    }
+  }
+})
+
+<span class="cmt">// actions are auto-generated from the reducer names!</span>
+<span class="kw">export const</span> { itemAdded, itemRemoved, cartCleared } <span class="op">=</span> cartSlice.<span class="pr">actions</span>
+<span class="kw">export default</span> cartSlice.<span class="pr">reducer</span></code></pre></div>
+<div class="note pro"><span class="ico">&#129504;</span><div class="body"><strong>The "mutating" magic:</strong> inside <code>createSlice</code>, RTK uses a library called <strong>Immer</strong>. You write <code>state.items.push(...)</code> as if mutating, but Immer tracks your changes and produces a brand-new immutable state behind the scenes. You get simple code AND Redux's immutability rules. This eliminates the #1 source of classic-Redux bugs and boilerplate.</div></div>
+<h3>Setting up the store</h3>
+<div class="code"><div class="head"><span class="lang">app/store.js</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { configureStore } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>
+<span class="kw">import</span> cartReducer <span class="kw">from</span> <span class="str">'../features/cart/cartSlice'</span>
+
+<span class="kw">export const</span> <span class="var">store</span> <span class="op">=</span> <span class="fn">configureStore</span>({
+  <span class="pr">reducer</span>: {
+    <span class="pr">cart</span>: cartReducer,   <span class="cmt">// state.cart is owned by the cart slice</span>
+    <span class="cmt">// user: userReducer, products: productsReducer, ...</span>
+  }
+})
+<span class="cmt">// DevTools, thunk middleware, good defaults - all configured automatically</span></code></pre></div>
+<div class="code"><div class="head"><span class="lang">main.jsx - provide the store</span></div><pre><code><span class="kw">import</span> { Provider } <span class="kw">from</span> <span class="str">'react-redux'</span>
+<span class="kw">import</span> { store } <span class="kw">from</span> <span class="str">'./app/store'</span>
+
+&lt;<span class="tg">Provider</span> store={store}&gt;
+  &lt;<span class="tg">App</span> /&gt;
+&lt;/<span class="tg">Provider</span>&gt;</code></pre></div>
+<h3>Using it in components</h3>
+<div class="code"><div class="head"><span class="lang">Cart.jsx</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { useSelector, useDispatch } <span class="kw">from</span> <span class="str">'react-redux'</span>
+<span class="kw">import</span> { itemAdded, itemRemoved } <span class="kw">from</span> <span class="str">'./cartSlice'</span>
+
+<span class="kw">function</span> <span class="fn">Cart</span>() {
+  <span class="cmt">// useSelector READS a slice of state (re-renders only when it changes)</span>
+  <span class="kw">const</span> <span class="var">items</span> <span class="op">=</span> <span class="fn">useSelector</span>(state <span class="op">=&gt;</span> state.cart.items)
+  <span class="kw">const</span> <span class="var">total</span> <span class="op">=</span> <span class="fn">useSelector</span>(state <span class="op">=&gt;</span> state.cart.total)
+
+  <span class="cmt">// useDispatch gives you the dispatch function</span>
+  <span class="kw">const</span> <span class="var">dispatch</span> <span class="op">=</span> <span class="fn">useDispatch</span>()
+
+  <span class="kw">return</span> (
+    &lt;<span class="tg">div</span>&gt;
+      Total: ${total}
+      &lt;<span class="tg">button</span> onClick={() <span class="op">=&gt;</span> <span class="fn">dispatch</span>(<span class="fn">itemAdded</span>({ id: <span class="num">1</span>, price: <span class="num">50</span> }))}&gt;
+        Add item
+      &lt;/<span class="tg">button</span>&gt;
+    &lt;/<span class="tg">div</span>&gt;
+  )
+}</code></pre></div>
+<div class="note ok"><span class="ico">&#9989;</span><div class="body"><strong>Two hooks are all you need in components:</strong> <code>useSelector</code> to read state (it re-renders the component only when the selected slice changes &mdash; solving Context's re-render problem), and <code>useDispatch</code> to send actions. Notice the whole feature is now one slice file plus these two hooks &mdash; a fraction of classic Redux.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 05</span><span class="etitle">Build with RTK</span></div><ul>
+<li><span class="chk"></span><span>Create a counter slice with increment/decrement/incrementByAmount.</span></li>
+<li><span class="chk"></span><span>Set up the store with configureStore and wrap the app in Provider.</span></li>
+<li><span class="chk"></span><span>Read state with useSelector and dispatch actions in a component.</span></li>
+<li><span class="chk"></span><span>Build a cart slice using the "mutating" Immer style.</span></li>
+<li><span class="chk"></span><span>Open Redux DevTools and watch actions/state change.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s6">
+<div class="tag">Redux family &middot; 06</div>
+<h2><span class="emoji">&#8987;</span>Async with Thunks</h2>
+<p class="intro">Reducers must be pure &mdash; they can't make API calls. So how does Redux handle async work like fetching data? With <strong>middleware</strong>. The default, built into RTK, is the <strong>thunk</strong>.</p>
+<h3>What a thunk is</h3>
+<p>A <strong>thunk</strong> is simply a function you can dispatch (instead of a plain action object) that's allowed to do async work and dispatch real actions when it's done. The name just means "a function that wraps some work to do later." RTK's <code>createAsyncThunk</code> handles the common pattern for you.</p>
+<div class="code"><div class="head"><span class="lang">createAsyncThunk - fetch users</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { createAsyncThunk, createSlice } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit'</span>
+
+<span class="cmt">// defines an async action. RTK auto-creates pending/fulfilled/rejected</span>
+<span class="kw">export const</span> <span class="var">fetchUsers</span> <span class="op">=</span> <span class="fn">createAsyncThunk</span>(
+  <span class="str">'users/fetch'</span>,
+  <span class="kw">async</span> () <span class="op">=&gt;</span> {
+    <span class="kw">const</span> <span class="var">res</span> <span class="op">=</span> <span class="kw">await</span> <span class="fn">fetch</span>(<span class="str">'/api/users'</span>)
+    <span class="kw">return</span> <span class="var">res</span>.<span class="fn">json</span>()   <span class="cmt">// becomes action.payload on success</span>
+  }
+)
+
+<span class="kw">const</span> <span class="var">usersSlice</span> <span class="op">=</span> <span class="fn">createSlice</span>({
+  <span class="pr">name</span>: <span class="str">'users'</span>,
+  <span class="pr">initialState</span>: { list: [], status: <span class="str">'idle'</span>, error: <span class="kw">null</span> },
+  <span class="pr">reducers</span>: {},
+  <span class="cmt">// handle the 3 lifecycle actions the thunk dispatches</span>
+  <span class="fn">extraReducers</span>: (builder) <span class="op">=&gt;</span> {
+    builder
+      .<span class="fn">addCase</span>(fetchUsers.<span class="pr">pending</span>,   (s) <span class="op">=&gt;</span> { s.status <span class="op">=</span> <span class="str">'loading'</span> })
+      .<span class="fn">addCase</span>(fetchUsers.<span class="pr">fulfilled</span>, (s, a) <span class="op">=&gt;</span> { s.status <span class="op">=</span> <span class="str">'done'</span>; s.list <span class="op">=</span> a.payload })
+      .<span class="fn">addCase</span>(fetchUsers.<span class="pr">rejected</span>,  (s, a) <span class="op">=&gt;</span> { s.status <span class="op">=</span> <span class="str">'error'</span>; s.error <span class="op">=</span> a.error.message })
+  }
+})</code></pre></div>
+<div class="code"><div class="head"><span class="lang">Dispatching it from a component</span></div><pre><code><span class="kw">const</span> <span class="var">dispatch</span> <span class="op">=</span> <span class="fn">useDispatch</span>()
+<span class="kw">const</span> { <span class="var">list</span>, <span class="var">status</span> } <span class="op">=</span> <span class="fn">useSelector</span>(s <span class="op">=&gt;</span> s.users)
+
+<span class="fn">useEffect</span>(() <span class="op">=&gt;</span> { <span class="fn">dispatch</span>(<span class="fn">fetchUsers</span>()) }, [])
+
+<span class="kw">if</span> (status <span class="op">===</span> <span class="str">'loading'</span>) <span class="kw">return</span> &lt;<span class="tg">Spinner</span> /&gt;</code></pre></div>
+<div class="note info"><span class="ico">&#128161;</span><div class="body"><strong>Why three lifecycle actions?</strong> Every async request has three moments: it started (<code>pending</code> &rarr; show a spinner), it succeeded (<code>fulfilled</code> &rarr; store the data), or it failed (<code>rejected</code> &rarr; show an error). <code>createAsyncThunk</code> generates all three for you, so you just decide what each does to the state.</div></div>
+<div class="note pro"><span class="ico">&#128640;</span><div class="body"><strong>Thunks vs Sagas (preview):</strong> thunks are simple and cover the vast majority of async needs &mdash; fetch, then dispatch. They're the right default. <strong>Redux-Saga</strong> (next section) is a heavier alternative for <em>complex</em> async orchestration: cancelling in-flight requests, debouncing, retrying, reacting to other actions, long-running background flows. Most apps should use thunks; reach for Saga only when the async logic is genuinely complex.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 06</span><span class="etitle">Async with thunks</span></div><ul>
+<li><span class="chk"></span><span>Write a createAsyncThunk that fetches a list from an API.</span></li>
+<li><span class="chk"></span><span>Handle pending/fulfilled/rejected in extraReducers.</span></li>
+<li><span class="chk"></span><span>Render loading, success, and error states from the status field.</span></li>
+<li><span class="chk"></span><span>Explain why the fetch can't live directly in a normal reducer.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+<section id="s7">
+<div class="tag">Redux family &middot; 07</div>
+<h2><span class="emoji">&#127909;</span>Redux-Saga</h2>
+<p class="intro">Redux-Saga is a middleware for handling <strong>complex async flows</strong> in Redux. Where thunks say "do this async thing then dispatch," Saga lets you describe elaborate, long-running, cancellable processes as if they were step-by-step scripts. It's powerful but heavier &mdash; learn when (and whether) you need it.</p>
+<h3>The core idea: generator functions</h3>
+<p>Saga is built on JavaScript <strong>generator functions</strong> (<code>function*</code> with <code>yield</code>). A generator can pause at each <code>yield</code> and resume later &mdash; perfect for describing async steps. Saga runs these generators and handles the actual async work, so your saga code stays pure and testable.</p>
+<div class="code"><div class="head"><span class="lang">A saga that watches for an action and fetches data</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { call, put, takeLatest } <span class="kw">from</span> <span class="str">'redux-saga/effects'</span>
+
+<span class="cmt">// the worker saga: does the actual fetching</span>
+<span class="kw">function*</span> <span class="fn">fetchUsersSaga</span>() {
+  <span class="kw">try</span> {
+    <span class="cmt">// 'call' = run this function and wait for it</span>
+    <span class="kw">const</span> <span class="var">res</span> <span class="op">=</span> <span class="kw">yield</span> <span class="fn">call</span>(fetch, <span class="str">'/api/users'</span>)
+    <span class="kw">const</span> <span class="var">data</span> <span class="op">=</span> <span class="kw">yield</span> <span class="fn">call</span>([res, <span class="str">'json'</span>])
+    <span class="cmt">// 'put' = dispatch an action to the store</span>
+    <span class="kw">yield</span> <span class="fn">put</span>({ type: <span class="str">'users/loaded'</span>, payload: data })
+  } <span class="kw">catch</span> (err) {
+    <span class="kw">yield</span> <span class="fn">put</span>({ type: <span class="str">'users/failed'</span>, error: err.message })
+  }
+}
+
+<span class="cmt">// the watcher saga: listens for the trigger action</span>
+<span class="kw">function*</span> <span class="fn">rootSaga</span>() {
+  <span class="cmt">// takeLatest: on each 'users/fetch', run the worker -</span>
+  <span class="cmt">// and CANCEL any previous run still in progress (no race conditions!)</span>
+  <span class="kw">yield</span> <span class="fn">takeLatest</span>(<span class="str">'users/fetch'</span>, fetchUsersSaga)
+}</code></pre></div>
+<h3>The "effects" vocabulary</h3>
+<table>
+<tr><th>Effect</th><th>Means</th></tr>
+<tr><td><code>call(fn, args)</code></td><td>Call a function (usually async) and wait for the result</td></tr>
+<tr><td><code>put(action)</code></td><td>Dispatch an action to the store</td></tr>
+<tr><td><code>takeLatest(type, saga)</code></td><td>Run the saga on each matching action; cancel prior runs</td></tr>
+<tr><td><code>takeEvery(type, saga)</code></td><td>Run the saga on every matching action (no cancelling)</td></tr>
+<tr><td><code>select(selector)</code></td><td>Read from the current store state</td></tr>
+<tr><td><code>delay(ms)</code></td><td>Wait (for debouncing, polling, retries)</td></tr>
+<tr><td><code>cancel</code> / <code>race</code></td><td>Cancel tasks / race two effects against each other</td></tr>
+</table>
+<div class="analogy"><div class="label">A film director's shooting script</div><p>A thunk is a stagehand: "go fetch this prop, then come back." A saga is a full director's script that can say "start this scene, but if the lead actor leaves, cancel and reshoot; wait 3 seconds between takes; if it fails twice, try a stunt double." Saga shines when the <em>choreography</em> of async events is complex &mdash; cancellation, debouncing, retries, reacting to other events.</p></div>
+<h3>What Saga is genuinely good at</h3>
+<ul>
+<li><strong>Cancellation</strong> &mdash; <code>takeLatest</code> auto-cancels stale requests (e.g. fast typing in search).</li>
+<li><strong>Debounce / throttle</strong> &mdash; built-in via <code>delay</code> and effect patterns.</li>
+<li><strong>Complex sequences</strong> &mdash; "do A, wait for B, then if C do D" orchestration.</li>
+<li><strong>Reacting to actions</strong> &mdash; one action can trigger a whole background flow.</li>
+<li><strong>Testability</strong> &mdash; because sagas yield plain effect <em>descriptions</em>, you can test the flow without running real async.</li>
+</ul>
+<div class="note bad"><span class="ico">&#9888;&#65039;</span><div class="body"><strong>The honest verdict on Saga today:</strong> it's powerful but has a steep learning curve (generators, the effects API) and adds significant complexity. For ordinary "fetch and store" needs, <strong>thunks are simpler and recommended</strong> &mdash; and for server data specifically, <strong>RTK Query</strong> (next) eliminates most async code entirely. Reach for Saga only when you have genuinely complex async orchestration that thunks struggle with. Many modern teams never need it. Knowing what it's <em>for</em> matters more than using it everywhere.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 07</span><span class="etitle">Understand Saga</span></div><ul>
+<li><span class="chk"></span><span>Explain how a generator function pauses and resumes at <code>yield</code>.</span></li>
+<li><span class="chk"></span><span>Write a watcher + worker saga that fetches data on an action.</span></li>
+<li><span class="chk"></span><span>Explain how <code>takeLatest</code> prevents search-race-conditions.</span></li>
+<li><span class="chk"></span><span>Decide: would a simple "load profile on mount" need Saga or a thunk?</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s8">
+<div class="tag">Redux family &middot; 08</div>
+<h2><span class="emoji">&#128229;</span>RTK Query</h2>
+<p class="intro">RTK Query is part of Redux Toolkit and handles <strong>server state</strong> &mdash; fetching, caching, and syncing API data &mdash; with almost no code. If you're already in the Redux ecosystem, it's the answer to "how do I fetch data" and it makes most thunks/sagas unnecessary.</p>
+<h3>The problem it solves</h3>
+<p>Recall the key insight: server data isn't really "state" you own &mdash; it's a cached copy of remote data. Managing it with manual thunks means writing loading flags, caching, refetching, and dedup by hand. RTK Query (like TanStack Query from your HTTP course) does all of that automatically. You just <em>describe your endpoints</em>.</p>
+<div class="code"><div class="head"><span class="lang">Define an API slice</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { createApi, fetchBaseQuery } <span class="kw">from</span> <span class="str">'@reduxjs/toolkit/query/react'</span>
+
+<span class="kw">export const</span> <span class="var">api</span> <span class="op">=</span> <span class="fn">createApi</span>({
+  <span class="pr">reducerPath</span>: <span class="str">'api'</span>,
+  <span class="pr">baseQuery</span>: <span class="fn">fetchBaseQuery</span>({ baseUrl: <span class="str">'/api'</span> }),
+  <span class="pr">endpoints</span>: (builder) <span class="op">=&gt;</span> ({
+    <span class="cmt">// a query (read)</span>
+    <span class="fn">getProducts</span>: builder.<span class="fn">query</span>({ query: () <span class="op">=&gt;</span> <span class="str">'/products'</span> }),
+    <span class="cmt">// a mutation (write)</span>
+    <span class="fn">addProduct</span>: builder.<span class="fn">mutation</span>({
+      query: (body) <span class="op">=&gt;</span> ({ url: <span class="str">'/products'</span>, method: <span class="str">'POST'</span>, body })
+    })
+  })
+})
+
+<span class="cmt">// RTK Query AUTO-GENERATES hooks from your endpoints!</span>
+<span class="kw">export const</span> { useGetProductsQuery, useAddProductMutation } <span class="op">=</span> api</code></pre></div>
+<div class="code"><div class="head"><span class="lang">Use the auto-generated hooks</span></div><pre><code><span class="kw">function</span> <span class="fn">Products</span>() {
+  <span class="cmt">// fires the request, caches it, gives you all states - one line</span>
+  <span class="kw">const</span> { <span class="var">data</span>, <span class="var">isLoading</span>, <span class="var">error</span> } <span class="op">=</span> <span class="fn">useGetProductsQuery</span>()
+  <span class="kw">const</span> [<span class="var">addProduct</span>] <span class="op">=</span> <span class="fn">useAddProductMutation</span>()
+
+  <span class="kw">if</span> (isLoading) <span class="kw">return</span> &lt;<span class="tg">Spinner</span> /&gt;
+  <span class="kw">return</span> data.<span class="fn">map</span>(p <span class="op">=&gt;</span> &lt;<span class="tg">div</span> key={p.id}&gt;{p.name}&lt;/<span class="tg">div</span>&gt;)
+}</code></pre></div>
+<div class="note ok"><span class="ico">&#9989;</span><div class="body"><strong>This looks just like TanStack Query</strong> from your HTTP course &mdash; and that's the point. Both solve server state the same way: describe endpoints, get auto-generated hooks with caching, loading/error states, dedup, and background refetching. The difference: RTK Query lives inside Redux (great if you already use Redux), while TanStack Query is standalone (great if you don't).</div></div>
+<h3>RTK Query vs TanStack Query</h3>
+<table>
+<tr><th></th><th>RTK Query</th><th>TanStack Query</th></tr>
+<tr><td>Part of</td><td>Redux Toolkit</td><td>Standalone</td></tr>
+<tr><td>Use when</td><td class="y">Already using Redux</td><td class="y">Not using Redux</td></tr>
+<tr><td>Caching, dedup, refetch</td><td class="y">Yes</td><td class="y">Yes</td></tr>
+<tr><td>Works with any framework</td><td>React-focused</td><td class="y">React, Vue, Svelte, Solid</td></tr>
+</table>
+<div class="note pro"><span class="ico">&#129504;</span><div class="body"><strong>The big-picture takeaway:</strong> once you use a query library (RTK Query or TanStack Query) for server data, your remaining "global client state" is usually tiny &mdash; theme, auth, a few UI flags. That small remainder rarely justifies full Redux, which is a major reason lightweight tools like Zustand (next) have become so popular.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 08</span><span class="etitle">RTK Query</span></div><ul>
+<li><span class="chk"></span><span>Define an API slice with a getItems query and addItem mutation.</span></li>
+<li><span class="chk"></span><span>Use the auto-generated query hook and render loading/data/error.</span></li>
+<li><span class="chk"></span><span>Explain why server data doesn't belong in a normal Redux slice.</span></li>
+<li><span class="chk"></span><span>State when you'd pick RTK Query vs TanStack Query.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+<section id="s9">
+<div class="tag">Modern minimalist &middot; 09</div>
+<h2><span class="emoji">&#128043;</span>Zustand</h2>
+<p class="intro">Zustand (German for "state") is a tiny, modern state library that's become hugely popular as a simpler alternative to Redux. It gives you a global store with almost no boilerplate &mdash; no providers, no actions, no reducers required.</p>
+<h3>The whole thing is one function</h3>
+<p>You create a store with <code>create</code>, defining both the state and the functions that change it in one place. Components subscribe by calling the hook with a <strong>selector</strong>.</p>
+<div class="code"><div class="head"><span class="lang">store.js - the entire store</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { create } <span class="kw">from</span> <span class="str">'zustand'</span>
+
+<span class="kw">const</span> <span class="var">useCartStore</span> <span class="op">=</span> <span class="fn">create</span>((set) <span class="op">=&gt;</span> ({
+  <span class="cmt">// state</span>
+  items: [],
+  total: <span class="num">0</span>,
+
+  <span class="cmt">// actions live right next to the state - set() updates it</span>
+  <span class="fn">addItem</span>: (item) <span class="op">=&gt;</span> <span class="fn">set</span>((state) <span class="op">=&gt;</span> ({
+    items: [...state.items, item],
+    total: state.total <span class="op">+</span> item.price
+  })),
+  <span class="fn">clear</span>: () <span class="op">=&gt;</span> <span class="fn">set</span>({ items: [], total: <span class="num">0</span> })
+}))
+
+<span class="kw">export default</span> useCartStore</code></pre></div>
+<div class="code"><div class="head"><span class="lang">Using it - no Provider needed!</span><button class="copy">copy</button></div><pre><code><span class="kw">function</span> <span class="fn">Cart</span>() {
+  <span class="cmt">// select ONLY what you need - re-renders only when THAT changes</span>
+  <span class="kw">const</span> <span class="var">total</span> <span class="op">=</span> <span class="fn">useCartStore</span>(s <span class="op">=&gt;</span> s.total)
+  <span class="kw">const</span> <span class="var">addItem</span> <span class="op">=</span> <span class="fn">useCartStore</span>(s <span class="op">=&gt;</span> s.addItem)
+
+  <span class="kw">return</span> &lt;<span class="tg">button</span> onClick={() <span class="op">=&gt;</span> <span class="fn">addItem</span>({ id: <span class="num">1</span>, price: <span class="num">50</span> })}&gt;
+    Total: ${total}
+  &lt;/<span class="tg">button</span>&gt;
+}
+
+<span class="cmt">// any other component reads the SAME store - automatically in sync</span>
+<span class="kw">function</span> <span class="fn">HeaderCartCount</span>() {
+  <span class="kw">const</span> <span class="var">count</span> <span class="op">=</span> <span class="fn">useCartStore</span>(s <span class="op">=&gt;</span> s.items.length)
+  <span class="kw">return</span> &lt;<span class="tg">span</span>&gt;{count}&lt;/<span class="tg">span</span>&gt;
+}</code></pre></div>
+<h3>Why people love it</h3>
+<div class="grid">
+<div class="card"><h5 style="color:var(--acc6)">Strengths</h5><ul><li>Almost no boilerplate</li><li>No Provider to wrap the app</li><li>Selector-based: fine-grained re-renders by default</li><li>Tiny (~1KB)</li><li>Works outside React too</li><li>Easy async (just await inside an action)</li></ul></div>
+<div class="card"><h5 style="color:var(--acc4)">Trade-offs</h5><ul><li>Less rigid structure than Redux</li><li>Smaller (though solid) ecosystem</li><li>DevTools good but less deep than Redux's</li><li>Freedom can mean inconsistency on big teams</li></ul></div>
+</div>
+<div class="note ok"><span class="ico">&#9989;</span><div class="body"><strong>Async is trivial</strong> &mdash; no thunks or sagas needed. An action can just be <code>async</code>: <code>fetchUser: async (id) =&gt; { const u = await api.get(id); set({ user: u }) }</code>. This simplicity, plus selector-based subscriptions that avoid Context's re-render problem, is why Zustand is the default global-state pick for many modern apps.</div></div>
+<div class="note pro"><span class="ico">&#129504;</span><div class="body"><strong>Redux vs Zustand in one line:</strong> Redux is structured, ceremonious, and battle-tested for large complex state with deep tooling; Zustand is minimal, flexible, and delightful for most apps' modest global state. With server data in a query library, most apps' remaining global state is small &mdash; which is exactly Zustand's sweet spot.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 09</span><span class="etitle">Build with Zustand</span></div><ul>
+<li><span class="chk"></span><span>Create a counter store with increment/decrement/reset and use it.</span></li>
+<li><span class="chk"></span><span>Read the same store from two separate components; confirm they sync.</span></li>
+<li><span class="chk"></span><span>Use a selector so a component re-renders only on the value it uses.</span></li>
+<li><span class="chk"></span><span>Add an async action that fetches data and calls set().</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s10">
+<div class="tag">Modern minimalist &middot; 10</div>
+<h2><span class="emoji">&#9883;&#65039;</span>Jotai &amp; the atomic model</h2>
+<p class="intro">Jotai takes a different philosophy: instead of one big store, you build state from many tiny independent pieces called <strong>atoms</strong>. It's "bottom-up" state &mdash; the opposite of Redux's one-big-store, "top-down" approach.</p>
+<h3>What an atom is</h3>
+<p>An <strong>atom</strong> is the smallest unit of state &mdash; a single value any component can read and write. You compose many atoms instead of one monolithic store. A component subscribes to exactly the atoms it uses, so re-renders are naturally minimal.</p>
+<div class="code"><div class="head"><span class="lang">Jotai - atoms</span><button class="copy">copy</button></div><pre><code><span class="kw">import</span> { atom, useAtom } <span class="kw">from</span> <span class="str">'jotai'</span>
+
+<span class="cmt">// define atoms - each a single piece of state</span>
+<span class="kw">const</span> <span class="var">countAtom</span> <span class="op">=</span> <span class="fn">atom</span>(<span class="num">0</span>)
+<span class="kw">const</span> <span class="var">nameAtom</span> <span class="op">=</span> <span class="fn">atom</span>(<span class="str">'Alice'</span>)
+
+<span class="cmt">// derived atom - computed from others, auto-updates</span>
+<span class="kw">const</span> <span class="var">doubledAtom</span> <span class="op">=</span> <span class="fn">atom</span>((get) <span class="op">=&gt;</span> <span class="fn">get</span>(countAtom) <span class="op">*</span> <span class="num">2</span>)
+
+<span class="kw">function</span> <span class="fn">Counter</span>() {
+  <span class="cmt">// useAtom works like useState, but the state is shared globally</span>
+  <span class="kw">const</span> [<span class="var">count</span>, <span class="var">setCount</span>] <span class="op">=</span> <span class="fn">useAtom</span>(countAtom)
+  <span class="kw">const</span> [<span class="var">doubled</span>] <span class="op">=</span> <span class="fn">useAtom</span>(doubledAtom)
+
+  <span class="kw">return</span> &lt;<span class="tg">button</span> onClick={() <span class="op">=&gt;</span> <span class="fn">setCount</span>(c <span class="op">=&gt;</span> c <span class="op">+</span> <span class="num">1</span>)}&gt;
+    {count} (doubled: {doubled})
+  &lt;/<span class="tg">button</span>&gt;
+}</code></pre></div>
+<div class="analogy"><div class="label">Lego bricks vs one big sculpture</div><p>Redux is one large pre-formed sculpture &mdash; all state in a single shaped store. Jotai is a box of Lego bricks (atoms) &mdash; you grab just the pieces you need and snap them together; derived atoms are bricks made from other bricks. Components hold only the bricks they use, so changing one brick doesn't disturb the rest.</p></div>
+<div class="note info"><span class="ico">&#128161;</span><div class="body"><strong>Atomic feels like useState that's shared.</strong> <code>useAtom</code> has the same <code>[value, setValue]</code> shape as <code>useState</code> &mdash; the difference is the value lives outside the component and any other component using the same atom shares it. This makes Jotai very easy to adopt incrementally. <strong>Recoil</strong> (from Meta) pioneered this atomic model; Jotai is the lighter, more popular successor today.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 10</span><span class="etitle">Atomic state</span></div><ul>
+<li><span class="chk"></span><span>Create a countAtom and use it from two components.</span></li>
+<li><span class="chk"></span><span>Create a derived atom (e.g. isEven) computed from another.</span></li>
+<li><span class="chk"></span><span>Explain how atomic subscriptions minimize re-renders.</span></li>
+<li><span class="chk"></span><span>Contrast "bottom-up" atoms with Redux's "one big store".</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s11">
+<div class="tag">Modern minimalist &middot; 11</div>
+<h2><span class="emoji">&#129513;</span>Others: Recoil, MobX, Valtio, XState</h2>
+<p class="intro">A few more libraries you'll encounter. You don't need to learn all of them &mdash; but knowing what each is for helps you read codebases and make informed choices.</p>
+<h3>Recoil</h3>
+<p>Meta's atomic state library &mdash; the original "atoms and selectors" approach that inspired Jotai. Powerful, but development has slowed and the community has largely shifted to <strong>Jotai</strong> for new projects. If you see Recoil, read it as "atomic state, like Jotai."</p>
+<h3>MobX</h3>
+<p>A different paradigm: <strong>observable state with automatic tracking</strong>. You mark state as observable, and MobX automatically re-renders any component that reads it &mdash; no selectors, no actions, no manual subscriptions. It feels almost magical: just mutate the state and the UI updates.</p>
+<div class="code"><div class="head"><span class="lang">MobX flavor</span></div><pre><code><span class="kw">import</span> { makeAutoObservable } <span class="kw">from</span> <span class="str">'mobx'</span>
+
+<span class="kw">class</span> <span class="fn">CartStore</span> {
+  items <span class="op">=</span> []
+  <span class="fn">constructor</span>() { <span class="fn">makeAutoObservable</span>(<span class="kw">this</span>) }
+  <span class="fn">add</span>(item) { <span class="kw">this</span>.items.<span class="fn">push</span>(item) }  <span class="cmt">// just mutate - MobX tracks it</span>
+  <span class="kw">get</span> <span class="fn">count</span>() { <span class="kw">return</span> <span class="kw">this</span>.items.length }  <span class="cmt">// auto-derived</span>
+}</code></pre></div>
+<p>MobX trades Redux's explicit predictability for convenience and less code. Great for OOP-style codebases; the "magic" can make data flow harder to trace than Redux's explicit actions.</p>
+<h3>Valtio</h3>
+<p>From the same author as Zustand &mdash; a <strong>proxy-based</strong> store where you mutate a plain object and components reading it update automatically (MobX-like simplicity, lighter weight). <code>const state = proxy({ count: 0 })</code> then just <code>state.count++</code>.</p>
+<h3>XState</h3>
+<p>Not a typical store &mdash; a <strong>state machine</strong> library. You define explicit states ("idle", "loading", "success", "error") and the allowed transitions between them. Excellent for complex UI flows where you want to make impossible states impossible (e.g. can't be "loading" and "error" at once). Heavier, but unmatched for intricate workflows like multi-step forms, wizards, and media players.</p>
+<table>
+<tr><th>Library</th><th>Paradigm</th><th>One-line take</th></tr>
+<tr><td>Recoil</td><td>Atomic</td><td>Meta's atoms; mostly superseded by Jotai</td></tr>
+<tr><td>MobX</td><td>Observable / reactive</td><td>Mutate freely, auto-tracked; less explicit</td></tr>
+<tr><td>Valtio</td><td>Proxy / mutable</td><td>Zustand author's "just mutate" store</td></tr>
+<tr><td>XState</td><td>State machine</td><td>Explicit states + transitions for complex flows</td></tr>
+</table>
+<div class="note pro"><span class="ico">&#129504;</span><div class="body"><strong>You don't need to learn all of these.</strong> The landscape clusters into a few ideas: <em>one big store</em> (Redux), <em>simple store</em> (Zustand), <em>atoms</em> (Jotai/Recoil), <em>observables</em> (MobX/Valtio), and <em>state machines</em> (XState). Understanding the <em>paradigm</em> lets you pick up any specific library quickly. For most apps, the choice is really just Context + Zustand (or Redux Toolkit) + a query library &mdash; the rest are situational.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 11</span><span class="etitle">Map the landscape</span></div><ul>
+<li><span class="chk"></span><span>Match each library to its paradigm (store / atoms / observable / machine).</span></li>
+<li><span class="chk"></span><span>Name a scenario where XState's explicit states would shine.</span></li>
+<li><span class="chk"></span><span>Explain the trade-off MobX makes vs Redux.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+<section id="s12">
+<div class="tag">Wrap-up &middot; 12</div>
+<h2><span class="emoji">&#9878;&#65039;</span>Compare &amp; choose</h2>
+<p class="intro">You've seen every major tool. The good news: choosing is simpler than it looks, because most of them aren't competitors &mdash; they serve different kinds of state, and the best apps combine them.</p>
+<h3>The full comparison</h3>
+<table>
+<tr><th>Tool</th><th>Best for</th><th>Boilerplate</th><th>Async</th></tr>
+<tr><td><code>useState</code></td><td>Local component state</td><td class="y">None</td><td>n/a</td></tr>
+<tr><td><code>useReducer</code></td><td>Complex local state</td><td class="y">Low</td><td>n/a</td></tr>
+<tr><td>Context API</td><td>Rarely-changing global (theme, auth)</td><td class="y">Low</td><td>manual</td></tr>
+<tr><td>Redux Toolkit</td><td>Large, complex global state</td><td class="mid">Medium</td><td>thunks</td></tr>
+<tr><td>Redux-Saga</td><td>Complex async orchestration</td><td class="nn">High</td><td class="y">excellent</td></tr>
+<tr><td>RTK Query</td><td>Server data (in Redux apps)</td><td class="y">Low</td><td class="y">built-in</td></tr>
+<tr><td>Zustand</td><td>Most global client state</td><td class="y">Very low</td><td class="y">trivial</td></tr>
+<tr><td>Jotai</td><td>Granular, derived state</td><td class="y">Very low</td><td class="y">good</td></tr>
+<tr><td>TanStack Query</td><td>Server data (any app)</td><td class="y">Low</td><td class="y">built-in</td></tr>
+</table>
+<h3>They combine &mdash; a real modern stack</h3>
+<div class="code"><div class="head"><span class="lang">A typical 2025 React app</span></div><pre><code><span class="hl">Server data</span>        TanStack Query (or RTK Query)   &lt;- most of your "state"
+<span class="hl">Global client state</span> Zustand (or Redux Toolkit)      &lt;- theme, auth, UI flags
+<span class="hl">Low-freq global</span>     Context API                     &lt;- theme/locale delivery
+<span class="hl">Local UI state</span>      useState / useReducer           &lt;- inputs, toggles, modals
+<span class="hl">URL state</span>          the router                      &lt;- filters, page, search
+
+<span class="hl"># These don't conflict - each handles a different KIND of state.</span></code></pre></div>
+<h3>The decision flow</h3>
+<div class="code"><div class="head"><span class="lang">How to choose</span></div><pre><code>Is it from the server (API)?
+   YES -&gt; TanStack Query (or RTK Query if already on Redux). DONE.
+   NO  -&gt; continue...
+
+Does only one component (or a couple nearby) use it?
+   YES -&gt; useState / useReducer. DONE.
+   NO  -&gt; it's shared client state...
+
+Does it rarely change (theme, locale, auth)?
+   YES -&gt; Context API is enough.
+   NO  -&gt; you need a real store...
+
+How big/complex is the global state?
+   Small-to-medium     -&gt; Zustand (or Jotai for granular/derived).
+   Large &amp; complex,
+   need deep DevTools   -&gt; Redux Toolkit.
+   Complex async
+   orchestration        -&gt; RTK + Saga (rare).</code></pre></div>
+<h3>Decision guide cards</h3>
+<div class="grid">
+<div class="card"><h5 style="color:var(--acc6)">Reach for Zustand when&hellip;</h5><ul><li>You want a global store with minimal fuss</li><li>Small-to-medium app</li><li>You dislike boilerplate</li><li>The default modern pick</li></ul></div>
+<div class="card"><h5 style="color:var(--acc)">Reach for Redux Toolkit when&hellip;</h5><ul><li>Large app, many developers</li><li>Complex interconnected state</li><li>You want deep DevTools &amp; conventions</li><li>An existing Redux codebase</li></ul></div>
+<div class="card"><h5 style="color:var(--acc3)">Reach for Context when&hellip;</h5><ul><li>Theme / auth / locale</li><li>Value changes rarely</li><li>You want zero dependencies</li></ul></div>
+<div class="card"><h5 style="color:var(--acc2)">Reach for a query lib when&hellip;</h5><ul><li>The data comes from an API</li><li>You want caching &amp; refetch free</li><li>(Almost always, for server data)</li></ul></div>
+</div>
+<div class="note ok"><span class="ico">&#127891;</span><div class="body"><strong>The most important realization:</strong> the "which state library" debate is mostly answered by first separating server state (use a query library) from client state. Once server data is handled by TanStack/RTK Query, the leftover global client state is usually small &mdash; and Context or Zustand handles it easily. Redux Toolkit is for when that client state is genuinely large and complex. Match the tool to the <em>kind</em> of state, and the choice makes itself.</div></div>
+<div class="ex"><div class="eh"><span class="enum">EX 12</span><span class="etitle">Choose for real apps</span></div><ul>
+<li><span class="chk"></span><span>For a blog with comments, decide the tool for each kind of state.</span></li>
+<li><span class="chk"></span><span>For a large dashboard with complex filters, justify Redux Toolkit or not.</span></li>
+<li><span class="chk"></span><span>Explain why moving server data to a query lib shrinks your global store.</span></li>
+<li><span class="chk"></span><span>Design the full state stack for an e-commerce app.</span></li>
+</ul></div>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+
+<section id="s13">
+<div class="tag">Wrap-up &middot; 13</div>
+<h2><span class="emoji">&#9989;</span>The master checklist</h2>
+<p class="intro">Your one-page reference for state management. Use it to decide where any piece of state should live.</p>
+<h3>The tools at a glance</h3>
+<table>
+<tr><th>Need</th><th>Reach for</th></tr>
+<tr><td>One component's own state</td><td>useState</td></tr>
+<tr><td>Complex local state logic</td><td>useReducer</td></tr>
+<tr><td>Rarely-changing global value</td><td>Context API</td></tr>
+<tr><td>Most shared client state</td><td>Zustand</td></tr>
+<tr><td>Granular / derived shared state</td><td>Jotai</td></tr>
+<tr><td>Large, complex global state</td><td>Redux Toolkit</td></tr>
+<tr><td>Complex async orchestration</td><td>Redux-Saga (rarely)</td></tr>
+<tr><td>Server data (in Redux apps)</td><td>RTK Query</td></tr>
+<tr><td>Server data (any app)</td><td>TanStack Query</td></tr>
+</table>
+<h3>The mental model in one diagram</h3>
+<div class="code"><div class="head"><span class="lang">Where does this state go?</span></div><pre><code>FROM THE SERVER?  ----------------&gt; Query library (TanStack / RTK Query)
+                                     (caching, loading, refetch - free)
+
+CLIENT STATE:
+  used by ONE component?  ---------&gt; useState
+  complex local logic?    ---------&gt; useReducer
+  shared, rarely changes? ---------&gt; Context
+  shared, changes often?  ---------&gt; Zustand / Jotai / Redux Toolkit
+  lives in the URL?       ---------&gt; the router</code></pre></div>
+<h3>The principles that outlast any library</h3>
+<div class="note ok"><span class="ico">&#127891;</span><div class="body"><strong>(1)</strong> Separate the four kinds of state &mdash; server, global client, local, URL &mdash; and match each to its right tool. <strong>(2)</strong> Server data belongs in a query library, not a global store. <strong>(3)</strong> Keep state as local as possible; lift only when truly shared. <strong>(4)</strong> Prefer selector-based subscriptions (Zustand/Redux) over Context for fast-changing widely-read state. <strong>(5)</strong> Reducers/actions are a pattern, not a library &mdash; you saw the same loop in useReducer, Redux, and RTK. <strong>(6)</strong> Reach for the simplest tool that solves the problem; add power only when pain appears. Libraries change; these don't.</div></div>
+<h3>The non-negotiable habits</h3>
+<ul>
+<li><strong>Don't put server data in Redux/Context</strong> &mdash; use a query library; it removes most of your "state" code.</li>
+<li><strong>Don't globalize prematurely</strong> &mdash; most state is local. A global store for one prop one level deep is over-engineering.</li>
+<li><strong>Don't fear combining tools</strong> &mdash; Query + Zustand + Context + useState in one app is normal and healthy.</li>
+<li><strong>Do learn useReducer well</strong> &mdash; it's the foundation under Redux, and often enough on its own.</li>
+</ul>
+<div class="ex"><div class="eh"><span class="enum">FINAL</span><span class="etitle">Capstone: design a state architecture</span></div>
+<div class="edesc">Pick a real product (a social app, a SaaS dashboard, a shop) and write its full state plan.</div><ul>
+<li><span class="chk"></span><span>List every piece of state and tag it server / global / local / URL.</span></li>
+<li><span class="chk"></span><span>Choose a query library for all server data and justify it.</span></li>
+<li><span class="chk"></span><span>Pick a client-state tool (Context / Zustand / Redux Toolkit) and justify it.</span></li>
+<li><span class="chk"></span><span>Identify what stays in useState and what (if anything) needs URL state.</span></li>
+<li><span class="chk"></span><span>Decide whether you need Saga (probably not) and explain why.</span></li>
+<li><span class="chk"></span><span>Write one sentence per choice explaining the trade-off you accepted.</span></li>
+</ul></div>
+<div class="divider"></div>
+<p style="text-align:center; color:var(--txt2); font-size:14px; padding-bottom:20px;">&#129518; That's state management end-to-end &mdash; from useState to Redux Toolkit, Saga, Zustand, Jotai and beyond. The named libraries are just different answers to one question: where does shared state live, and how do components subscribe to it?</p>
+<a class="up" href="#top">&uarr; top</a>
+</section>
+</main>
+</div>
+<script>
+const sections = [...document.querySelectorAll('section')];
+const links = [...document.querySelectorAll('.nav-link')];
+const pbar = document.getElementById('pbar');
+const ptxt = document.getElementById('ptxt');
+function updateActive() {
+  let idx = 0;
+  const mid = window.scrollY + window.innerHeight / 3;
+  sections.forEach((s, i) => { if (s.offsetTop <= mid) idx = i; });
+  links.forEach((l, i) => l.classList.toggle('active', i === idx));
+  ptxt.textContent = 'Section ' + (idx + 1) + ' / ' + sections.length;
+  pbar.style.width = ((idx + 1) / sections.length * 100) + '%';
+}
+window.addEventListener('scroll', updateActive);
+updateActive();
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const code = btn.closest('.code').querySelector('code').innerText;
+    navigator.clipboard.writeText(code).then(() => {
+      const t = btn.textContent; btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = t, 1400);
+    });
+  });
+});
+const ptasks = document.getElementById('ptasks');
+const checks = [...document.querySelectorAll('.chk')];
+function refreshTasks() {
+  const done = checks.filter(c => c.classList.contains('done')).length;
+  ptasks.textContent = done + ' / ' + checks.length + ' tasks';
+}
+checks.forEach(c => {
+  c.addEventListener('click', () => {
+    c.classList.toggle('done');
+    c.textContent = c.classList.contains('done') ? '\u2713' : '';
+    c.closest('li').classList.toggle('done', c.classList.contains('done'));
+    refreshTasks();
+  });
+});
+refreshTasks();
+</script>
+</body>
+</html>
